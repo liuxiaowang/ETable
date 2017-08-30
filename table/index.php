@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="bootstrap.css">
+    <title>Document</title>
+</head>
+<style>
+    #add{
+        cursor: pointer;
+    }
+    .del{
+        cursor: pointer;
+
+    }
+    .progress{
+        width: 0;
+        height: 5px;
+        background: red;
+        box-shadow: 0 0 5px red;
+        position: fixed;
+        top:0;
+        left:0;
+    }
+</style>
+<body>
+<div class="progress"></div>
+<div class="container">
+    <div class="col-sm-6 col-sm-offset-3">
+        <table class="table table-bordered">
+            <caption class="text-center">学生信息管理表</caption>
+            <thead>
+            <tr class="bg-success">
+                <th>姓名</th>
+                <th>年龄</th>
+                <th>性别</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="4" class="text-center" id="add">add</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+</body>
+<script src="../js/jQuery1.10.2.js"></script>
+<script>
+//    function getData(){
+//        if(localStorage.student){
+//            return JSON.parse(localStorage.student);
+//        }else{
+//            return [];
+//        }
+//    }
+//    function savaData(data){
+//        localStorage.student=JSON.stringify(data);
+//    }
+//    $("#add").click(function(){
+//        var data=getData();
+//        data.push({name:"",sex:"",age:""});
+//        savaData(data);
+//        reWrite();
+//    })
+//    //事件委派
+////    $("tbody").on("click",".del",function(){})
+//    $("tbody").delegate(".del","click",function(){
+//        var index=$(this).parent().attr("id");
+//        var data=getData();
+//        data.splice(index,1);
+//        savaData(data);
+//        reWrite();
+//    });
+//    function reWrite(){
+//        var data=getData();
+//        $("tbody").empty();
+//        $.each(data,function(index,value){
+//            $("<tr>").html("<td contenteditable='true'>"+value.name+"</td><td>"+value.sex+"</td><td>"+value.age+"</td><td class='del text-center'>删除</td>").attr("id",index).appendTo("tbody");
+//        })
+//    }
+//    reWrite();
+//    function change(ele){
+//        var data=getData();
+//        var index=$(ele).parent().attr("id");
+//        var attr=$(ele).attr("data-role");
+//        var val=$(ele).html();
+//        data[index][attr]=val;
+//        savaData(data);
+//        reWrite();
+//    }
+
+    function select(){
+        $.get("select.php",function(r){
+            $("tbody").empty();
+            var str='';
+            $.each(r,function(index,value){
+                str+=`
+                   <tr id="${value.id}">
+                       <td contenteditable="true" onblur="change(this)" data-role="name">${value.name}</td>
+                       <td contenteditable="true" onblur="change(this)" data-role="age">${value.age}</td>
+                       <td contenteditable="true" onblur="change(this)" data-role="sex">${value.sex}</td>
+                       <td class="del text-center bg-danger">删除</td>
+                   </tr>
+                `;});
+            $("tbody").html(str);
+               /* $("<tr>").html("<td contenteditable='true' data-role='name' onblur='change(this)'>"+value.name+"</td><td contenteditable='true' data-role='age' onblur='change(this)'>"+value.age+"</td><td  contenteditable='true' data-role='sex' onblur='change(this)'>"+value.sex+"</td><td class='del text-center danger'>删除</td>").attr("id",value.id).appendTo("tbody");
+            })
+        },"json")*/
+        },"json")
+    }
+    select();
+    $("#add").click(function(){
+        $.get("insert.php",function(r){
+            if(r){
+                alert("插入成功");
+                select();
+            }else{
+                alert("插入失败");
+            }
+        })
+    });
+    $("tbody").on("click",".del",function(){
+        var nowid=$(this).parent().attr("id");
+        $.get("delete.php",{id:nowid},function(r){
+            if(r){
+                alert("删除成功");
+                select();
+            }else{
+                alert("删除失败");
+            }
+        })
+    })
+
+    /*function change(ele){
+        var index=$(ele).parent().attr("id");
+        var attr=$(ele).attr("data-role");
+        var val=$(ele).html();
+        $.get("updata.php",{id:index,attr:attr,val:val},function(r){
+            if(r){
+                alert("修改成功");
+                select();
+            }else{
+                alert("修改失败");
+            }
+        })
+    }*/
+    window.change=function(ele){
+        var index=$(ele).parent().attr("id");
+        var attr=$(ele).attr("data-role");
+        var val=$(ele).html();
+        $.get("updata.php",{id:index,attr,val},function(r){
+            if(r==1){
+                alert("修改成功");
+                select();
+            }
+        })
+    }
+    $(document).ajaxComplete(function(){
+        $(".progress").animate({width:$(window).width()},1000,function(){
+            $(this).css({width:0});
+        });
+    })
+
+
+</script>
+</html>
