@@ -30,12 +30,13 @@
 <div class="progress"></div>
 <div class="container">
     <div class="col-sm-6 col-sm-offset-3">
+        <input type="search" id="search" placeholder="输入姓名查询">
         <table class="table table-bordered">
             <caption class="text-center">学生信息管理表</caption>
             <thead>
             <tr class="bg-success">
                 <th>姓名</th>
-                <th>年龄</th>
+                <th><a href="javascript:;" id="age">年龄</a></th>
                 <th>性别</th>
                 <th>操作</th>
             </tr>
@@ -100,10 +101,29 @@
 
     function select(){
         $.get("select.php",function(r){
-            $("tbody").empty();
-            var str='';
-            $.each(r,function(index,value){
-                str+=`
+//            $("tbody").empty();
+            /* var str='';
+            *$.each(r,function(index,value){
+                 str+=`
+                    <tr id="${value.id}">
+                        <td contenteditable="true" onblur="change(this)" data-role="name">${value.name}</td>
+                        <td contenteditable="true" onblur="change(this)" data-role="age">${value.age}</td>
+                        <td contenteditable="true" onblur="change(this)" data-role="sex">${value.sex}</td>
+                        <td class="del text-center bg-danger">删除</td>
+                    </tr>
+                 `;});
+             $("tbody").html(str);*/
+               /* $("<tr>").html("<td contenteditable='true' data-role='name' onblur='change(this)'>"+value.name+"</td><td contenteditable='true' data-role='age' onblur='change(this)'>"+value.age+"</td><td  contenteditable='true' data-role='sex' onblur='change(this)'>"+value.sex+"</td><td class='del text-center danger'>删除</td>").attr("id",value.id).appendTo("tbody");
+            })
+        },"json")*/
+               write(r);
+        },"json")
+    }
+    select();
+    function write(r){
+        var str='';
+        $.each(r,function(index,value){
+            str+=`
                    <tr id="${value.id}">
                        <td contenteditable="true" onblur="change(this)" data-role="name">${value.name}</td>
                        <td contenteditable="true" onblur="change(this)" data-role="age">${value.age}</td>
@@ -111,13 +131,9 @@
                        <td class="del text-center bg-danger">删除</td>
                    </tr>
                 `;});
-            $("tbody").html(str);
-               /* $("<tr>").html("<td contenteditable='true' data-role='name' onblur='change(this)'>"+value.name+"</td><td contenteditable='true' data-role='age' onblur='change(this)'>"+value.age+"</td><td  contenteditable='true' data-role='sex' onblur='change(this)'>"+value.sex+"</td><td class='del text-center danger'>删除</td>").attr("id",value.id).appendTo("tbody");
-            })
-        },"json")*/
-        },"json")
+        $("tbody").html(str);
     }
-    select();
+
     $("#add").click(function(){
         $.get("insert.php",function(r){
             if(r){
@@ -170,6 +186,34 @@
         });
     })
 
+    var flag=true;
+    $("#age").click(function(){
+        if(flag){
+            $.get("select.php",{order:"desc"},function(r){
+                /*r.sort(function(a,b){
+                    if(a.age>b.age){
+                        return 1;
+                    }else{
+                        return -1;
+                    }
+                })*/
+                write(r);
+            },"json");
+            flag=!flag;
+        }else{
+            $.get("select.php",{order:"asc"},function(r){
+                write(r);
+            },"json");
+            flag=!flag;
+        }
 
+    })
+
+
+    $("#search").blur(function(){
+        $.get("select.php",{name:$(this).val()},function(r){
+            write(r);
+        },"json");
+    })
 </script>
 </html>
